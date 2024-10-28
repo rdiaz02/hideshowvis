@@ -235,20 +235,30 @@ functions used with `after-change-functions'."
   '((t (:background "#ff8" :box t)))
   "Face to hightlight the ... area of hidden regions.")
 
+;; RDU
+;; Just comment the when and all gets the yellow boxes
+;; If you want different markers for text,
+;; condition on when (eq 'code  vs. not code
+;; e.g., use "%d lines" and "[%d]" which is what I used
 (defun hideshowvis-display-code-line-counts (ov)
   "Extend overlay OV to show number of lines hidden for `hideshowvis-symbols'."
-  (when (eq 'code (overlay-get ov 'hs))
-    (overlay-put ov 'help-echo "Hidden text. C-c,= to show")
-    (overlay-put ov 'before-string
-                 (propertize "*fringe-dummy*"
-                             'display
-                             '(left-fringe
-                               hideshowvis-hidden-marker
-                               hideshowvis-hidden-fringe-face)))
-    (overlay-put ov 'after-string
-                 (propertize
-                  (format "%d lines" (count-lines (overlay-start ov) (overlay-end ov)))
-                  'face 'hideshowvis-hidden-region-face))))
+  ;;(when (eq 'code (overlay-get ov 'hs))
+  (overlay-put ov 'help-echo "Hidden text. C-c,= to show")
+  (overlay-put ov 'before-string
+               (propertize "*fringe-dummy*"
+                           'display
+                           '(left-fringe
+                             hideshowvis-hidden-marker
+                             hideshowvis-hidden-fringe-face)))
+  (overlay-put ov 'after-string
+               (propertize
+                (format "%d lines" (count-lines (overlay-start ov) (overlay-end ov)))
+                'face 'hideshowvis-hidden-region-face))
+  ;;) ;; the commented when
+  )
+
+
+
 
 ;;;###autoload
 (defun hideshowvis-symbols ()
