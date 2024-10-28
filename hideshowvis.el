@@ -7,8 +7,8 @@
 ;; Version: 0.7
 ;; Package-Requires: ((emacs "24"))
 ;;
-;; Contributions and bug fixes by Bryan Waite, Michael Heerdegen, John Yates and
-;; Matthew Fidler.
+;; Contributions and bug fixes by Bryan Waite, Michael Heerdegen, John Yates,
+;; Matthew Fidler, and Eyal Soha.
 ;;
 ;; This file is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -140,23 +140,21 @@ functions used with `after-change-functions'."
         (goto-char (point-min))
         (remove-overlays (point-min) (point-max) 'hideshowvis-hs t)
         (while (search-forward-regexp hs-block-start-regexp nil t)
-          (let* ((ovl (make-overlay (match-beginning 0) (match-end 0)))
-                 (marker-string "*hideshowvis*")
-                 (doit
-                  (if hideshowvis-ignore-same-line
-                      (let (begin-line)
-                        (setq begin-line
-                              (save-excursion
-                                (goto-char (match-beginning 0))
-                                (line-number-at-pos (point))))
-                        (save-excursion
-                          (goto-char (match-beginning 0))
-                          (ignore-errors
-                            (progn
-                              (funcall hs-forward-sexp-func 1)
-                              (> (line-number-at-pos (point)) begin-line)))))
-                    t)))
-            (when doit
+          (when (if hideshowvis-ignore-same-line
+                    (let (begin-line)
+                      (setq begin-line
+                            (save-excursion
+                              (goto-char (match-beginning 0))
+                              (line-number-at-pos (point))))
+                      (save-excursion
+                        (goto-char (match-beginning 0))
+                        (ignore-errors
+                          (progn
+                            (funcall hs-forward-sexp-func 1)
+                            (> (line-number-at-pos (point)) begin-line)))))
+                  t)
+            (let* ((ovl (make-overlay (match-beginning 0) (match-end 0)))
+                   (marker-string "*hideshowvis*"))
               (put-text-property 0
                                  (length marker-string)
                                  'display
@@ -232,30 +230,31 @@ indicating the number of hidden lines at the end of the line for hidden regions.
 This will change the value of `hs-set-up-overlay' so it will
 overwrite anything you've set there."
   (interactive)
-  
+
   (define-fringe-bitmap 'hideshowvis-hidden-marker [0 24 24 126 126 24 24 0])
-  
+
   (defcustom hideshowvis-hidden-fringe-face 'hideshowvis-hidden-fringe-face
     "*Specify face used to highlight the fringe on hidden regions."
     :type 'face
     :group 'hideshow)
-  
+
   (defface hideshowvis-hidden-fringe-face
     '((t (:foreground "#888" :box (:line-width 2 :color "grey75" :style released-button))))
     "Face used to highlight the fringe on folded regions"
     :group 'hideshow)
-  
+
   (defcustom hideshowvis-hidden-region-face 'hideshowvis-hidden-region-face
     "*Specify the face to to use for the hidden region indicator"
     :type 'face
     :group 'hideshow)
-  
+
   (defface hideshowvis-hidden-region-face
     '((t (:background "#ff8" :box t)))
     "Face to hightlight the ... area of hidden regions"
     :group 'hideshow)
 
   (defun hideshowvis-display-code-line-counts (ov)
+
     (let* ((marker-string "*fringe-dummy*")
            (marker-length (length marker-string))
            (display-string (format "(%d)..." (count-lines (overlay-start ov) (overlay-end ov))))
@@ -270,22 +269,20 @@ overwrite anything you've set there."
       (put-text-property 0 (length display-string) 'face 'hideshowvis-hidden-region-face display-string)
       (overlay-put ov 'display display-string)))
 
-  
+
   ;; original
-  ;; (defun hideshowvis-display-code-line-counts (ov)
-  ;;   (when (eq 'code (overlay-get ov 'hs))
-  ;;     (let* ((marker-string "*fringe-dummy*")
-  ;;            (marker-length (length marker-string))
-  ;;            (display-string (format "(%d)..." (count-lines (overlay-start ov) (overlay-end ov))))
-  ;;            )
-  ;;       (overlay-put ov 'help-echo "Hiddent text. C-c,= to show")
-  ;;       (put-text-property 0 marker-length 'display
-  ;;                          (list 'left-fringe 'hideshowvis-hidden-marker 'hideshowvis-hidden-fringe-face)
-  ;;                          marker-string)
-  ;;       (overlay-put ov 'before-string marker-string)
-  ;;       (put-text-property 0 (length display-string) 'face 'hideshowvis-hidden-region-face display-string)
-  ;;       (overlay-put ov 'display display-string))))
-  
+    ;; (when (eq 'code (overlay-get ov 'hs))
+    ;;   (let* ((marker-string "*fringe-dummy*")
+    ;;          (marker-length (length marker-string))
+    ;;          (display-string (format "%d lines" (count-lines (overlay-start ov) (overlay-end ov)))))
+    ;;     (overlay-put ov 'help-echo "Hiddent text. C-c,= to show")
+    ;;     (put-text-property 0 marker-length 'display
+    ;;                        (list 'left-fringe 'hideshowvis-hidden-marker 'hideshowvis-hidden-fringe-face)
+    ;;                        marker-string)
+    ;;     (overlay-put ov 'before-string marker-string)
+    ;;     (put-text-property 0 (length display-string) 'face 'hideshowvis-hidden-region-face display-string)
+    ;;     (overlay-put ov 'after-string display-string))))
+
   (setq hs-set-up-overlay 'hideshowvis-display-code-line-counts))
 
 
