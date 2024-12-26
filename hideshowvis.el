@@ -231,9 +231,19 @@ functions used with `after-change-functions'."
   "*Specify the face to to use for the hidden region indicator."
   :type 'face)
 
+;; (defface hideshowvis-hidden-region-face
+;;   '((t (:background "#ff8" :box t)))
+;;   "Face to hightlight the ... area of hidden regions.")
+
+;; ;; RDU: try transparent background, because the yellow is bad in dark themes
+;; (defface hideshowvis-hidden-region-face
+;;   '((t (:background "FF" :box t)))
+;;   "Face to hightlight the ... area of hidden regions.")
+
 (defface hideshowvis-hidden-region-face
-  '((t (:background "#ff8" :box t)))
+  '((t (:foreground "#778899":background "#ff8" :box t)))
   "Face to hightlight the ... area of hidden regions.")
+
 
 ;; RDU
 ;; Just comment the when and all gets the yellow boxes
